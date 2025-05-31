@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hotel Assistant</title>
+    <script src="script.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+
+        
+        /* Chatbot Custom Styling */
+        .chatbox {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 450px;
+    max-width: 90%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, opacity 0.3s;
+}
+
+.chat-header {
+    background: #6a0dad;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.chat-body {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 12px;
+    padding-bottom: 2px;
+    background-color: #f9f9f9;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input area positioned below messages */
+.chatbox {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 450px;
+    max-width: 90%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, opacity 0.3s;
+    z-index: 999;
+}
+
+/* Header styles */
+.chat-header {
+    background: #6a0dad;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+}
+
+/* Hide chat body initially */
+.hidden {
+    display: none;
+}
+
+/* Chat body styles */
+.chat-body {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Bot message styles */
+.bot-msg {
+    background-color: #e9e9ff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    max-width: 80%;
+}
+
+/* User message styles */
+.user-msg {
+    background-color: #d1e7dd;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    max-width: 80%;
+    align-self: flex-end;
+}
+
+/* Chat input and button styles */
+.mt-4.flex {
+    padding-top: 2px;
+    border-top: 1px solid #ddd;
+    background: #f9f9f9;
+    position: sticky;
+    bottom: 0;
+    margin-top: 2px;
+}
+
+input#user-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+button.bg-purple-700 {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+}
+
+/* Chat message container styles */
+#chat-messages {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 5px;
+    padding-right: 8px;
+}
+
+.message-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 80%;
+    margin-bottom: 2px;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #6a0dad;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 12px 12px 0 12px;
+    margin-bottom: 2px;
+    font-size: 0.9rem;
+}
+
+.bot-message {
+    align-self: flex-start;
+    background-color: #e9e9ff;
+    color: #333;
+    padding: 6px 10px;
+    border-radius: 12px 12px 12px 0;
+    margin-bottom: 2px;
+    font-size: 0.9rem;
+}
+
+.message-time {
+    font-size: 0.65rem;
+    color: #666;
+    margin-top: 1px;
+    margin-bottom: 3px;
+    align-self: flex-end;
+}
+
+/* Improve scrollbar appearance */
+#chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+#search-results {
+    transition: all 0.3s ease;
+}
+
+#search-results .bg-white {
+    transition: transform 0.3s ease;
+}
+
+#search-results .bg-white:hover {
+    transform: translateY(-5px);
+}
+
+.hotel-card-image {
+    transition: transform 0.3s ease;
+}
+
+.hotel-card:hover .hotel-card-image {
+    transform: scale(1.05);
+}
+#navbar {
+  position: fixed;
+  top: 0;
+
+  width: 100%;
+  background-color: #f6f0f5;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1000;
+}
+
+#navbar ul {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 1em 0;
+}
+
+#navbar ul li {
+  margin: 0 20px;
+}
+
+#navbar ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2em;
+  transition: color 0.3s ease;
+}
+
+/* Hover effect */
+#navbar ul li a:hover {
+  color: #FFD700;
+}
+
+/* When scrolled */
+#navbar.scrolled {
+  background-color: #222;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+
+    </style>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- 🌟 Navbar -->
+    <nav id="navbar" class="bg-white shadow-md p-4 flex justify-between items-center">
+        <h1 class="text-4xl font-bold text-purple-700 cursor-pointer" onclick="navigateToHome()">HotelBook</h1>
+        <ul class="flex gap-6">
+            <li class="cursor-pointer hover:text-purple-700" onclick="navigateToHome()">Home</li>
+            <li class="cursor-pointer hover:text-purple-700" onclick="navigateToHotels()">Hotels</li>
+            <li class="cursor-pointer hover:text-purple-700" onclick="navigateToContact()">Contact</li>
+        </ul>
+    </nav>
+
+    <!-- 🌟 Hero Section -->
+    <section class="text-center py-16 bg-purple-200">
+        <h2 class="text-4xl font-bold text-gray-900 mt-10 hot">Find Your Perfect Stay</h2>
+        <p class="text-gray-600 mt-2">Search hotels based on location, price, and rating</p>
+        <div class="mt-6 flex justify-center">
+            <input type="text" id="website-search" placeholder="Search hotels..." class="px-4 py-2 border rounded-l-md w-1/2">
+            <button onclick="searchHotelsWebsite()" class="bg-purple-700 text-white px-6 py-2 rounded-r-md hover:bg-purple-900">Search</button>
+        </div>
+        <!-- Add a container for search results -->
+        <div id="search-results" class="mt-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 hidden"></div>
+    </section>
+
+    <!-- 🌟 Features Section -->
+    <section class="py-12 bg-white">
+        <h2 class="text-3xl font-bold text-center text-gray-800">Why Choose Us?</h2>
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="p-6 bg-gray-100 rounded-lg shadow-md text-center">
+                <h3 class="text-xl font-bold text-purple-700">Best Price Guarantee</h3>
+                <p class="text-gray-600 mt-2">We ensure that you get the best deals for your stay.</p>
+            </div>
+            <div class="p-6 bg-gray-100 rounded-lg shadow-md text-center">
+                <h3 class="text-xl font-bold text-purple-700">24/7 Customer Support</h3>
+                <p class="text-gray-600 mt-2">Our AI assistant is available to help you anytime.</p>
+            </div>
+            <div class="p-6 bg-gray-100 rounded-lg shadow-md text-center">
+                <h3 class="text-xl font-bold text-purple-700">Easy Booking Process</h3>
+                <p class="text-gray-600 mt-2">Book your favorite hotels in just a few clicks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🌟 Popular Destinations -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Popular Destinations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <img src="download (1).jpg" alt="Paris" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold">Paris</h3>
+                        <p class="text-gray-600">Starting from $199/night</p>
+                        <button onclick="searchHotelsWebsite('Paris')" class="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                            Explore Hotels
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <img src="download (2).jpg" alt="Dubai" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold">Dubai</h3>
+                        <p class="text-gray-600">Starting from $299/night</p>
+                        <button onclick="searchHotelsWebsite('Dubai')" class="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                            Explore Hotels
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <img src="download (3).jpg" alt="New York" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold">New York</h3>
+                        <p class="text-gray-600">Starting from $249/night</p>
+                        <button onclick="searchHotelsWebsite('New York')" class="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                            Explore Hotels
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <img src="download.jpg" alt="Tokyo" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold">Tokyo</h3>
+                        <p class="text-gray-600">Starting from $179/night</p>
+                        <button onclick="searchHotelsWebsite('Tokyo')" class="mt-2 w-full bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                            Explore Hotels
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🌟 Special Offers -->
+    <section class="py-12 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Special Offers</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-purple-50 rounded-lg p-6 border-2 border-purple-100">
+                    <div class="text-purple-700 text-lg font-semibold mb-2">Early Bird Discount</div>
+                    <p class="text-gray-600 mb-4">Book 60 days in advance and get 25% off on your stay</p>
+                    <button onclick="viewOffer('early_bird')" class="text-purple-700 font-semibold hover:text-purple-900">
+                        Learn More →
+                    </button>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-6 border-2 border-purple-100">
+                    <div class="text-purple-700 text-lg font-semibold mb-2">Weekend Special</div>
+                    <p class="text-gray-600 mb-4">Get 15% off on weekend bookings + free breakfast</p>
+                    <button onclick="viewOffer('weekend')" class="text-purple-700 font-semibold hover:text-purple-900">
+                        Learn More →
+                    </button>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-6 border-2 border-purple-100">
+                    <div class="text-purple-700 text-lg font-semibold mb-2">Long Stay Offer</div>
+                    <p class="text-gray-600 mb-4">Stay 7 nights, pay for 5 nights only</p>
+                    <button onclick="viewOffer('long_stay')" class="text-purple-700 font-semibold hover:text-purple-900">
+                        Learn More →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🌟 Hotel Categories -->
+    <section class="py-12 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Browse by Category</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="filterHotels('luxury')" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                    <span class="text-3xl mb-2 block">🌟</span>
+                    <h3 class="text-lg font-semibold">Luxury Hotels</h3>
+                    <p class="text-gray-600 text-sm">5-star experiences</p>
+                </button>
+                <button onclick="filterHotels('budget')" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                    <span class="text-3xl mb-2 block">💰</span>
+                    <h3 class="text-lg font-semibold">Budget Hotels</h3>
+                    <p class="text-gray-600 text-sm">Best value stays</p>
+                </button>
+                <button onclick="filterHotels('beach')" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                    <span class="text-3xl mb-2 block">🏖️</span>
+                    <h3 class="text-lg font-semibold">Beach Resorts</h3>
+                    <p class="text-gray-600 text-sm">Oceanfront paradise</p>
+                </button>
+                <button onclick="filterHotels('city')" class="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
+                    <span class="text-3xl mb-2 block">🌆</span>
+                    <h3 class="text-lg font-semibold">City Hotels</h3>
+                    <p class="text-gray-600 text-sm">Urban convenience</p>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🌟 AI Chatbot Widget -->
+    <div class="chatbox" id="chatbot">
+        <div class="chat-header" onclick="toggleChat()">
+            <span>🤖 AI Hotel Assistant</span>
+            <button id="close-btn">-</button>
+        </div>
+        <div class="chat-body hidden" id="chat-body">
+            <!-- Buttons for quick actions -->
+            <div class="space-y-2">
+                <button onclick="showHotelSearch()" class="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-900 text-sm">Find Hotels</button>
+                <button onclick="showHotelReviews()" class="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-900 text-sm">Hotel Reviews</button>
+                <button onclick="showFAQs()" class="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-900 text-sm">Customer Support</button>
+            </div>
+            <!-- Hotel Reviews Section -->
+            <div id="reviews-section" class="hidden mt-4 space-y-2">
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-purple-700 mb-3">Hotel Reviews</h3>
+                    <div class="space-y-2">
+                        <button onclick="handleReview('luxury')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Luxury Hotels Reviews
+                        </button>
+                        <button onclick="handleReview('budget')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Budget Hotels Reviews
+                        </button>
+                        <button onclick="handleReview('beach')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Beachfront Hotels Reviews
+                        </button>
+                        <button onclick="handleReview('city')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            City Center Hotels Reviews
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- FAQ Section -->
+            <div id="faq-section" class="hidden mt-4 space-y-2">
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-purple-700 mb-3">Frequently Asked Questions</h3>
+                    <div class="space-y-2">
+                        <button onclick="handleFAQ('cancellation')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            What is your cancellation policy?
+                        </button>
+                        <button onclick="handleFAQ('payment')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            What payment methods do you accept?
+                        </button>
+                        <button onclick="handleFAQ('amenities')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            What amenities are included in the rooms?
+                        </button>
+                        <button onclick="handleFAQ('pets')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Are pets allowed in the hotels?
+                        </button>
+                        <button onclick="handleFAQ('parking')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Is parking available at the hotels?
+                        </button>
+                        <button onclick="handleFAQ('early_checkin')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Can I request early check-in?
+                        </button>
+                        <button onclick="handleFAQ('late_checkout')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            What is your late checkout policy?
+                        </button>
+                        <button onclick="handleFAQ('breakfast')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Is breakfast included in the room rate?
+                        </button>
+                        <button onclick="handleFAQ('wheelchair')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Do you have wheelchair-accessible rooms?
+                        </button>
+                        <button onclick="handleFAQ('group_booking')" class="w-full text-left p-2 hover:bg-purple-50 rounded-md">
+                            Do you offer group booking discounts?
+                        </button>
+                    </div>
+                </div>
+            </div>
+           <!-- Chat messages will appear here -->
+<div id="chat-messages" class="mt-4 space-y-2"></div>
+<!-- User input and send button -->
+<div class="mt-4 flex">
+    <input type="text" id="user-input" placeholder="Type your question..."
+        class="w-full px-4 py-2 border rounded-l-md focus:outline-none">
+    <button onclick="sendMessage()"
+        class="bg-purple-700 text-white px-6 py-2 rounded-r-md hover:bg-purple-900">Send</button>
+</div>
+        </div>
+    </div>
+    
+    <!-- 🌟 JavaScript for Chatbot -->
+    <script>
+        function toggleChat() {
+            let chatBody = document.getElementById("chat-body");
+            chatBody.classList.toggle("hidden");
+            
+            // Show welcome message only if it's the first time opening the chat
+            if (!chatBody.classList.contains("hidden") && !document.querySelector(".bot-message")) {
+                const chatMessages = document.getElementById("chat-messages");
+                const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const botMessageContainer = document.createElement('div');
+                botMessageContainer.className = 'message-container';
+                botMessageContainer.innerHTML = `
+                    <div class="bot-message">
+                        Hello! How can I assist you with your hotel booking today? 😊
+                    </div>
+                    <div class="message-time">${currentTime}</div>
+                `;
+                chatMessages.appendChild(botMessageContainer);
+            }
+        }
+
+        function sendMessage() {
+    const userInput = document.getElementById("user-input").value.trim();
+    if (userInput === "") return;
+
+    const chatMessages = document.getElementById("chat-messages");
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Create user message container
+    const userMessageContainer = document.createElement('div');
+    userMessageContainer.className = 'message-container';
+    userMessageContainer.innerHTML = `
+        <div class="user-message">
+            ${userInput}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(userMessageContainer);
+
+    document.getElementById("user-input").value = "";
+
+    setTimeout(async () => {
+        let botResponse = await getBotResponse(userInput.toLowerCase());
+        const botMessageContainer = document.createElement('div');
+        botMessageContainer.className = 'message-container';
+        botMessageContainer.innerHTML = `
+            <div class="bot-message">
+                ${botResponse}
+            </div>
+            <div class="message-time">${currentTime}</div>
+        `;
+        chatMessages.appendChild(botMessageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 500);
+}
+
+// Add event listener for Enter key
+document.getElementById("user-input").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
+const API_URL = "http://localhost:5000/api";
+// Function to get appropriate responses based on user input
+async function getBotResponse(input) {
+    if (input.includes("hello") || input.includes("hi")) {
+        return "Hello! How can I assist you with your hotel booking today? 😊";
+    } else if (input.includes("how are you") || input.includes("hw r u")) {
+        return "I'm doing great, thank you for asking! How can I help you with your hotel booking today? 😊";
+    } else if (input.includes("good morning")) {
+        return "Good morning! 🌅 I'm here to help you with your hotel booking. What would you like to know?";
+    } else if (input.includes("good afternoon")) {
+        return "Good afternoon! ☀️ How can I assist you with your hotel booking today?";
+    } else if (input.includes("good evening")) {
+        return "Good evening! 🌙 I'm here to help you with your hotel booking. What would you like to know?";
+    } else if (input.includes("good night")) {
+        return "Good night! 🌙 I'm here to help you with your hotel booking. What would you like to know?";
+    } else if (input.includes("bye") || input.includes("goodbye")) {
+        return "Goodbye! 👋 Have a great day! Feel free to come back if you need any help with your hotel booking.";
+    } else if (input.includes("help")) {
+        return "I can help you with:\n- Finding hotels\n- Checking hotel reviews\n- Booking information\n- Hotel amenities\n- Special requests\n- And much more! What would you like to know?";
+    } else if (input.includes("what can you do")) {
+        return "I can help you with:\n- Hotel searches and bookings\n- Hotel reviews and ratings\n- Room availability\n- Price information\n- Special offers\n- Hotel amenities\n- And more! Just ask! 😊";
+    } else if (input.includes("nice") || input.includes("good")) {
+        return "Thank you! 😊 Is there anything specific about hotels you'd like to know?";
+    } else if (input.includes("sorry")) {
+        return "No need to apologize! 😊 How can I help you with your hotel booking today?";
+    } else if (input.includes("please")) {
+        return "Of course! I'm here to help. What would you like to know about our hotels?";
+    } else if (input.includes("cancellation policy")) {
+        return "Our cancellation policy allows free cancellation up to 24 hours before check-in. After that, a fee of one night's stay will be charged.";
+    } else if (input.includes("payment method")) {
+        return "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers. Some hotels may also accept cash upon arrival.";
+    } else if (input.includes("amenities")) {
+        return "Our rooms typically include:\n- Free WiFi\n- Air conditioning\n- Flat-screen TV\n- Mini fridge\n- Coffee maker\n- Hair dryer\n- Iron and ironing board\n- Safe deposit box";
+    } else if (input.includes("pet") || input.includes("pets")) {
+        return "Pet policies vary by hotel. Most of our hotels are pet-friendly with a small additional fee. Please check with the specific hotel for their pet policy and any restrictions.";
+    } else if (input.includes("parking")) {
+        return "Yes, most of our hotels offer parking facilities. Some provide free parking, while others may charge a daily fee. Valet parking is available at select locations.";
+    } else if (input.includes("early check-in") || input.includes("early checkin")) {
+        return "Early check-in is subject to availability and may incur an additional fee. We recommend contacting the hotel directly at least 24 hours before your arrival to request early check-in.";
+    } else if (input.includes("late checkout")) {
+        return "Late checkout is available upon request and subject to availability. Standard late checkout is until 2 PM. Extended late checkout may incur additional charges.";
+    } else if (input.includes("breakfast")) {
+        return "Breakfast inclusion varies by hotel and room type. Some rates include breakfast, while others don't. You can add breakfast to your booking for an additional fee.";
+    } else if (input.includes("wheelchair") || input.includes("accessible")) {
+        return "Yes, we offer wheelchair-accessible rooms at most of our hotels. These rooms include wider doorways, grab bars, and roll-in showers. Please request this when booking.";
+    } else if (input.includes("group booking") || input.includes("group rate")) {
+        return "Yes, we offer special rates for group bookings of 10 or more rooms. Benefits include:\n- Discounted room rates\n- Dedicated group coordinator\n- Flexible payment terms\n- Room type guarantees";
+    } else if (input.includes("find hotel") || input.includes("search hotel")) {
+        return "Sure! Please provide me with the location or city where you're looking for a hotel.";
+    } else if (input.includes("room service")) {
+        return "Yes, most of our hotels offer 24/7 room service. You can order food, beverages, and other amenities directly to your room. A service charge may apply.";
+    } else if (input.includes("gym") || input.includes("fitness")) {
+        return "Most of our hotels have well-equipped fitness centers that are open 24/7. Some locations also offer yoga classes, personal trainers, and spa facilities.";
+    } else if (input.includes("pool") || input.includes("swimming")) {
+        return "Many of our hotels feature swimming pools. Some have indoor pools, outdoor pools, or both. Pool access is typically included in your room rate.";
+    } else if (input.includes("restaurant") || input.includes("dining")) {
+        return "Our hotels offer various dining options including:\n- On-site restaurants\n- Room service\n- Breakfast buffets\n- Bars and lounges\n- Coffee shops";
+    } else if (input.includes("wifi") || input.includes("internet")) {
+        return "Free high-speed WiFi is available in all our hotels. Premium WiFi with faster speeds is available for business travelers at an additional cost.";
+    } else if (input.includes("shuttle") || input.includes("transport")) {
+        return "Many of our hotels offer complimentary airport shuttle services. Some also provide city shuttle services and car rental arrangements.";
+    } else if (input.includes("conference") || input.includes("meeting")) {
+        return "We have conference rooms and meeting facilities available at most hotels. We offer:\n- Audio-visual equipment\n- Catering services\n- Business center access\n- High-speed internet\n- Professional event planning";
+    } else if (input.includes("kids") || input.includes("children")) {
+        return "We are family-friendly! Many hotels offer:\n- Kids' clubs\n- Children's pools\n- Family rooms\n- Special children's menus\n- Babysitting services";
+    } else if (input.includes("smoking") || input.includes("smoke")) {
+        return "Most of our hotels are non-smoking. However, some properties have designated smoking areas or smoking rooms available upon request.";
+    } else if (input.includes("check-in time")) {
+        return "Standard check-in time is 2 PM. Early check-in is subject to availability and may incur additional charges.";
+    } else if (input.includes("checkout time")) {
+        return "Standard checkout time is 12 PM. Late checkout is available upon request and subject to availability.";
+    } else if (input.includes("contact support")) {
+        return "You can reach our support team at support@hotelbook.com or call +1-800-123-456.";
+    } else if (input.includes("thank you") || input.includes("thanks")) {
+        return "You're welcome! 😊 Let me know if you need any more assistance.";
+    } else {
+        return "I'm sorry, I couldn't understand that. Can you please rephrase your question? 🤔";
+    }
+}
+
+// Call APIs
+async function searchHotels(location) {
+    const response = await fetch(`${API_URL}/hotels?location=${location}`);
+    return await response.json();
+}
+
+async function checkBooking(bookingId) {
+    const response = await fetch(`${API_URL}/booking/${bookingId}`);
+    return await response.json();
+}
+
+async function contactSupport(message) {
+    const response = await fetch(`${API_URL}/support`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+    });
+    return await response.json();
+}
+
+function showFAQs() {
+    const faqSection = document.getElementById('faq-section');
+    faqSection.classList.toggle('hidden');
+}
+
+function handleFAQ(type) {
+    const chatMessages = document.getElementById("chat-messages");
+    let response = "";
+    let question = "";
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    switch(type) {
+        case 'cancellation':
+            question = "What is your cancellation policy?";
+            response = "Our cancellation policy allows free cancellation up to 24 hours before check-in. After that, a fee of one night's stay will be charged.";
+            break;
+        case 'payment':
+            question = "What payment methods do you accept?";
+            response = "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers. Some hotels may also accept cash upon arrival.";
+            break;
+        case 'amenities':
+            question = "What amenities are included in the rooms?";
+            response = "Our rooms typically include:\n- Free WiFi\n- Air conditioning\n- Flat-screen TV\n- Mini fridge\n- Coffee maker\n- Hair dryer\n- Iron and ironing board\n- Safe deposit box";
+            break;
+        case 'pets':
+            question = "Are pets allowed in the hotels?";
+            response = "Pet policies vary by hotel. Most of our hotels are pet-friendly with a small additional fee. Please check with the specific hotel for their pet policy and any restrictions.";
+            break;
+        case 'parking':
+            question = "Is parking available at the hotels?";
+            response = "Yes, most of our hotels offer parking facilities. Some provide free parking, while others may charge a daily fee. Valet parking is available at select locations.";
+            break;
+        case 'early_checkin':
+            question = "Can I request early check-in?";
+            response = "Early check-in is subject to availability and may incur an additional fee. We recommend contacting the hotel directly at least 24 hours before your arrival to request early check-in.";
+            break;
+        case 'late_checkout':
+            question = "What is your late checkout policy?";
+            response = "Late checkout is available upon request and subject to availability. Standard late checkout is until 2 PM. Extended late checkout may incur additional charges.";
+            break;
+        case 'breakfast':
+            question = "Is breakfast included in the room rate?";
+            response = "Breakfast inclusion varies by hotel and room type. Some rates include breakfast, while others don't. You can add breakfast to your booking for an additional fee.";
+            break;
+        case 'wheelchair':
+            question = "Do you have wheelchair-accessible rooms?";
+            response = "Yes, we offer wheelchair-accessible rooms at most of our hotels. These rooms include wider doorways, grab bars, and roll-in showers. Please request this when booking.";
+            break;
+        case 'group_booking':
+            question = "Do you offer group booking discounts?";
+            response = "Yes, we offer special rates for group bookings of 10 or more rooms. Benefits include:\n- Discounted room rates\n- Dedicated group coordinator\n- Flexible payment terms\n- Room type guarantees";
+            break;
+    }
+
+    // Create user message container for the question
+    const userMessageContainer = document.createElement('div');
+    userMessageContainer.className = 'message-container';
+    userMessageContainer.innerHTML = `
+        <div class="user-message">
+            ${question}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(userMessageContainer);
+
+    // Create bot message container for the response
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'message-container';
+    botMessageContainer.innerHTML = `
+        <div class="bot-message">
+            ${response}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(botMessageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Hide FAQ section after selection
+    document.getElementById('faq-section').classList.add('hidden');
+}
+
+function showHotelReviews() {
+    const reviewsSection = document.getElementById('reviews-section');
+    reviewsSection.classList.toggle('hidden');
+}
+
+function handleReview(type) {
+    const chatMessages = document.getElementById("chat-messages");
+    let response = "";
+    let question = "";
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    switch(type) {
+        case 'luxury':
+            question = "Show me reviews for luxury hotels";
+            response = "Here are some top-rated luxury hotels:<br><br>" +
+                      "🏨 Grand Hotel Palace<br>" + 
+                      "   Location: 123 Luxury Avenue, Downtown<br>" +
+                      "   Rating: ⭐⭐⭐⭐⭐ (4.8/5)<br>" +
+                      "   Price Range: $500-$1000 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Exceptional service and stunning views from the rooftop restaurant'<br>" +
+                      "   • 'World-class amenities including spa, pool, and fitness center'<br>" +
+                      "   • 'Perfect location in city center, walking distance to major attractions'<br>" +
+                      "   • 'Michelin-starred restaurant with amazing cuisine'<br>" +
+                      "   • 'Luxury suites with panoramic city views'<br><br>" +
+                      "🏨 Royal Resort & Spa<br>" +
+                      "   Location: 456 Ocean Drive, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐⭐ (4.7/5)<br>" +
+                      "   Price Range: $450-$900 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Luxurious rooms with private balconies and ocean views'<br>" +
+                      "   • 'Impeccable staff service with personalized attention'<br>" +
+                      "   • 'Beautiful infinity pool and tropical garden area'<br>" +
+                      "   • 'Award-winning spa with unique treatments'<br>" +
+                      "   • 'Private beach access with water sports activities'<br><br>" +
+                      "🏨 The Ritz Carlton<br>" +
+                      "   Location: 789 Park Avenue, City Center<br>" +
+                      "   Rating: ⭐⭐⭐⭐⭐ (4.9/5)<br>" +
+                      "   Price Range: $600-$1200 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Unparalleled luxury and elegance'<br>" +
+                      "   • 'Exclusive rooftop lounge with city views'<br>" +
+                      "   • 'Private butler service for all rooms'<br>" +
+                      "   • 'Fine dining restaurants with celebrity chefs'<br>" +
+                      "   • 'Luxury spa and wellness center'<br><br>" +
+                      "🏨 Four Seasons Resort<br>" +
+                      "   Location: 321 Mountain View Road, Resort Area<br>" +
+                      "   Rating: ⭐⭐⭐⭐⭐ (4.8/5)<br>" +
+                      "   Price Range: $550-$1100 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Spectacular mountain and valley views'<br>" +
+                      "   • 'Private golf course and tennis courts'<br>" +
+                      "   • 'Luxury villas with private pools'<br>" +
+                      "   • 'World-class dining experiences'<br>" +
+                      "   • 'Exclusive wine tasting events'<br><br>" +
+                      "🏨 St. Regis Hotel<br>" +
+                      "   Location: 654 Harbor Front, Waterfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐⭐ (4.7/5)<br>" +
+                      "   Price Range: $500-$1000 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Iconic waterfront location'<br>" +
+                      "   • 'Luxury yacht service available'<br>" +
+                      "   • 'Signature butler service'<br>" +
+                      "   • 'Michelin-starred restaurants'<br>" +
+                      "   • 'Exclusive beach club access'";
+            break;
+        case 'budget':
+            question = "Show me reviews for budget hotels";
+            response = "Here are some highly-rated budget hotels:<br><br>" +
+                      "🏨 Comfort Inn Express<br>" +
+                      "   Location: 789 Business District, City Center<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.2/5)<br>" +
+                      "   Price Range: $80-$150 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Great value for money with clean, modern rooms'<br>" +
+                      "   • 'Complimentary hot breakfast with fresh options'<br>" +
+                      "   • 'Free high-speed WiFi and business center'<br>" +
+                      "   • 'Friendly staff always ready to help'<br>" +
+                      "   • 'Convenient location near shopping areas'<br><br>" +
+                      "🏨 City Lodge<br>" +
+                      "   Location: 321 Metro Street, Near Airport<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.1/5)<br>" +
+                      "   Price Range: $70-$130 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Perfect for short stays with essential amenities'<br>" +
+                      "   • 'Free airport shuttle service'<br>" +
+                      "   • '24-hour front desk and security'<br>" +
+                      "   • 'Clean rooms with comfortable beds'<br>" +
+                      "   • 'Good value for business travelers'<br><br>" +
+                      "🏨 Holiday Inn Express<br>" +
+                      "   Location: 456 Main Street, Downtown<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.0/5)<br>" +
+                      "   Price Range: $90-$160 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Reliable and comfortable stay'<br>" +
+                      "   • 'Free breakfast buffet'<br>" +
+                      "   • 'Business center and meeting rooms'<br>" +
+                      "   • 'Fitness center access'<br>" +
+                      "   • 'Close to public transportation'<br><br>" +
+                      "🏨 Quality Inn<br>" +
+                      "   Location: 123 Highway Road, Suburban Area<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (3.9/5)<br>" +
+                      "   Price Range: $75-$140 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Affordable and clean rooms'<br>" +
+                      "   • 'Free parking and WiFi'<br>" +
+                      "   • 'Swimming pool and hot tub'<br>" +
+                      "   • 'On-site restaurant'<br>" +
+                      "   • 'Family-friendly atmosphere'<br><br>" +
+                      "🏨 Days Inn<br>" +
+                      "   Location: 567 Industrial Park, Near Mall<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (3.8/5)<br>" +
+                      "   Price Range: $65-$120 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Basic but comfortable rooms'<br>" +
+                      "   • 'Free continental breakfast'<br>" +
+                      "   • 'Easy access to shopping mall'<br>" +
+                      "   • '24-hour reception'<br>" +
+                      "   • 'Pet-friendly rooms available'";
+            break;
+        case 'beach':
+            question = "Show me reviews for beachfront hotels";
+            response = "Here are some popular beachfront hotels:<br><br>" +
+                      "🏨 Ocean View Resort<br>" +
+                      "   Location: 567 Coastal Highway, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐½ (4.6/5)<br>" +
+                      "   Price Range: $300-$600 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Direct beach access with private beach area'<br>" +
+                      "   • 'Spectacular sunset views from beachfront rooms'<br>" +
+                      "   • 'Water sports center with equipment rental'<br>" +
+                      "   • 'Beachfront restaurant with fresh seafood'<br>" +
+                      "   • 'Family-friendly with kids' club and activities'<br><br>" +
+                      "🏨 Beach Paradise Hotel<br>" +
+                      "   Location: 890 Palm Beach Road, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐½ (4.5/5)<br>" +
+                      "   Price Range: $250-$500 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Private beach area with cabanas and loungers'<br>" +
+                      "   • 'Excellent seafood restaurant with ocean views'<br>" +
+                      "   • 'Relaxing spa with beachfront treatment rooms'<br>" +
+                      "   • 'Water sports and snorkeling available'<br>" +
+                      "   • 'Beautiful tropical gardens and pool area'<br><br>" +
+                      "🏨 Coastal Breeze Resort<br>" +
+                      "   Location: 234 Sandy Shore Drive, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐½ (4.4/5)<br>" +
+                      "   Price Range: $280-$550 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Stunning oceanfront location'<br>" +
+                      "   • 'Beach volleyball and water sports'<br>" +
+                      "   • 'Beachfront bar and grill'<br>" +
+                      "   • 'Sunset yoga sessions'<br>" +
+                      "   • 'Beach wedding venue available'<br><br>" +
+                      "🏨 Seaside Inn<br>" +
+                      "   Location: 432 Wave Street, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.3/5)<br>" +
+                      "   Price Range: $220-$450 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Direct access to pristine beach'<br>" +
+                      "   • 'Beachfront restaurant and bar'<br>" +
+                      "   • 'Water sports equipment rental'<br>" +
+                      "   • 'Beach chairs and umbrellas provided'<br>" +
+                      "   • 'Evening beach bonfires'<br><br>" +
+                      "🏨 Wave Crest Hotel<br>" +
+                      "   Location: 876 Surf Avenue, Beachfront<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.2/5)<br>" +
+                      "   Price Range: $200-$400 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Beautiful beachfront location'<br>" +
+                      "   • 'Surfing lessons available'<br>" +
+                      "   • 'Beachfront cafe and bar'<br>" +
+                      "   • 'Beach volleyball court'<br>" +
+                      "   • 'Sunset viewing deck'";
+            break;
+        case 'city':
+            question = "Show me reviews for city center hotels";
+            response = "Here are some top city center hotels:<br><br>" +
+                      "🏨 Metropolitan Hotel<br>" +
+                      "   Location: 432 Downtown Square, City Center<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.4/5)<br>" +
+                      "   Price Range: $200-$400 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Prime location in shopping and entertainment district'<br>" +
+                      "   • 'Walking distance to major attractions and museums'<br>" +
+                      "   • 'Modern amenities and rooftop bar'<br>" +
+                      "   • 'Efficient metro and bus connections'<br>" +
+                      "   • 'Business center with meeting rooms'<br><br>" +
+                      "🏨 Downtown Suites<br>" +
+                      "   Location: 765 Business Avenue, Financial District<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.3/5)<br>" +
+                      "   Price Range: $180-$350 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Perfect for business travelers with work desks'<br>" +
+                      "   • 'Easy access to public transport and subway'<br>" +
+                      "   • 'Spacious suites with kitchen facilities'<br>" +
+                      "   • 'Fitness center and business lounge'<br>" +
+                      "   • 'Close to corporate offices and conference centers'<br><br>" +
+                      "🏨 City Center Inn<br>" +
+                      "   Location: 987 Market Street, Shopping District<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.2/5)<br>" +
+                      "   Price Range: $160-$320 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Central location near shopping malls'<br>" +
+                      "   • 'Walking distance to restaurants and cafes'<br>" +
+                      "   • 'Modern rooms with city views'<br>" +
+                      "   • '24-hour convenience store nearby'<br>" +
+                      "   • 'Tourist information desk'<br><br>" +
+                      "🏨 Urban Lodge<br>" +
+                      "   Location: 543 City Square, Entertainment District<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.1/5)<br>" +
+                      "   Price Range: $150-$300 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Close to theaters and nightlife'<br>" +
+                      "   • 'Easy access to public transport'<br>" +
+                      "   • 'Comfortable rooms with city views'<br>" +
+                      "   • 'Restaurant and bar on site'<br>" +
+                      "   • 'Tour booking service available'<br><br>" +
+                      "🏨 Downtown Express<br>" +
+                      "   Location: 234 Main Street, Business District<br>" +
+                      "   Rating: ⭐⭐⭐⭐ (4.0/5)<br>" +
+                      "   Price Range: $140-$280 per night<br>" +
+                      "   Guest Reviews:<br>" +
+                      "   • 'Convenient for business meetings'<br>" +
+                      "   • 'Close to convention center'<br>" +
+                      "   • 'Business center and meeting rooms'<br>" +
+                      "   • 'Quick access to airport'<br>" +
+                      "   • 'Corporate rates available'";
+            break;
+    }
+
+    // Create user message container for the question
+    const userMessageContainer = document.createElement('div');
+    userMessageContainer.className = 'message-container';
+    userMessageContainer.innerHTML = `
+        <div class="user-message">
+            ${question}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(userMessageContainer);
+
+    // Create bot message container for the response
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'message-container';
+    botMessageContainer.innerHTML = `
+        <div class="bot-message">
+            ${response}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(botMessageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Hide reviews section after selection
+    document.getElementById('reviews-section').classList.add('hidden');
+}
+
+function showHotelSearch() {
+    const chatMessages = document.getElementById("chat-messages");
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'message-container';
+    botMessageContainer.innerHTML = `
+        <div class="bot-message">
+            Please enter the location where you'd like to find hotels. For example: "location New York" or "location London"
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(botMessageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function searchHotelsWebsite() {
+    const searchInput = document.getElementById('website-search').value.trim();
+    if (!searchInput) return;
+
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = ''; // Clear previous results
+    searchResults.classList.remove('hidden');
+
+    // Show loading state
+    searchResults.innerHTML = `
+        <div class="col-span-3 text-center py-4">
+            <p class="text-gray-600">🔍 Searching for hotels in ${searchInput}...</p>
+        </div>
+    `;
+
+    // Simulate API call delay
+    setTimeout(() => {
+        displaySearchResults(searchInput);
+    }, 1500);
+}
+
+function displaySearchResults(location) {
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = ''; // Clear loading state
+
+    // Generate random hotels (similar to chatbot logic but with different display)
+    const hotelTypes = ['Luxury', 'Business', 'Budget', 'Resort', 'Boutique'];
+    const amenities = ['Swimming Pool', 'Gym', 'Spa', 'Restaurant', 'Room Service', 'Free WiFi', 'Parking'];
+    const areas = ['City Center', 'Airport Road', 'Metro Station', 'Shopping District', 'Beach Road'];
+
+    // Generate 9 hotels for grid display
+    for (let i = 1; i <= 9; i++) {
+        const price = Math.floor(Math.random() * (500 - 50) + 50);
+        const rating = (Math.random() * (5 - 3.5) + 3.5).toFixed(1);
+        const hotelType = hotelTypes[Math.floor(Math.random() * hotelTypes.length)];
+        const area = areas[Math.floor(Math.random() * areas.length)];
+        const hotelAmenities = amenities.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+        const hotelCard = document.createElement('div');
+        hotelCard.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+        hotelCard.innerHTML = `
+            <div class="relative">
+                <img src="https://source.unsplash.com/400x300/?hotel" alt="Hotel" class="w-full h-48 object-cover">
+                <div class="absolute top-2 right-2 bg-white px-2 py-1 rounded text-sm">
+                    ⭐ ${rating}/5
+                </div>
+            </div>
+            <div class="p-4">
+                <h3 class="text-xl font-semibold">${hotelType} Hotel</h3>
+                <p class="text-gray-600">📍 ${area}, ${location}</p>
+                <p class="text-purple-700 font-bold mt-2">$${price} per night</p>
+                <div class="mt-2 text-sm text-gray-500">
+                    🎯 ${hotelAmenities.join(' • ')}
+                </div>
+                <button onclick="viewHotelDetails(${i})" class="mt-4 w-full bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800 transition-colors">
+                    View Details
+                </button>
+            </div>
+        `;
+        searchResults.appendChild(hotelCard);
+    }
+
+    // Add a "Show More" button
+    const showMoreButton = document.createElement('div');
+    showMoreButton.className = 'col-span-3 text-center py-4';
+    showMoreButton.innerHTML = `
+        <button onclick="loadMoreHotels()" class="bg-purple-100 text-purple-700 px-6 py-2 rounded-full hover:bg-purple-200 transition-colors">
+            Show More Hotels
+        </button>
+    `;
+    searchResults.appendChild(showMoreButton);
+}
+
+function viewHotelDetails(hotelId) {
+    // Open chatbot with hotel details
+    const chatBody = document.getElementById('chat-body');
+    if (chatBody.classList.contains('hidden')) {
+        toggleChat();
+    }
+
+    const chatMessages = document.getElementById('chat-messages');
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'message-container';
+    botMessageContainer.innerHTML = `
+        <div class="bot-message">
+            Would you like to book Hotel #${hotelId}? I can help you with:
+            • Checking room availability
+            • Making a reservation
+            • Special requests
+            • Payment options
+            
+            What would you like to know?
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(botMessageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function loadMoreHotels() {
+    const searchInput = document.getElementById('website-search').value.trim();
+    displaySearchResults(searchInput);
+}
+
+// Add Enter key support for the search input
+document.getElementById('website-search').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        searchHotelsWebsite();
+    }
+});
+
+function navigateToHome() {
+    // Update URL without reloading page
+    window.history.pushState({page: 'home'}, '', '/');
+    
+    // Clear any search results
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.add('hidden');
+        searchResults.innerHTML = '';
+    }
+    
+    // Reset search input
+    const searchInput = document.getElementById('website-search');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Hide any other sections that might be visible
+    hideAllSections();
+    
+    // Show hero and features sections
+    document.querySelector('.bg-purple-200').classList.remove('hidden');
+    document.querySelector('.bg-white').classList.remove('hidden');
+}
+
+function navigateToHotels() {
+    // Update URL without reloading page
+    window.history.pushState({page: 'hotels'}, '', '/hotels');
+    
+    hideAllSections();
+    
+    // Create and show hotels section if it doesn't exist
+    let hotelsSection = document.getElementById('hotels-section');
+    if (!hotelsSection) {
+        hotelsSection = document.createElement('section');
+        hotelsSection.id = 'hotels-section';
+        hotelsSection.className = 'py-12 bg-gray-50';
+        hotelsSection.innerHTML = `
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Browse Our Hotels</h2>
+                    <button onclick="navigateToHome()" class="bg-purple-100 text-purple-700 px-4 py-2 rounded hover:bg-purple-200">
+                        ← Back to Home
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <button onclick="filterHotels('all')" class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                        All Hotels
+                    </button>
+                    <button onclick="filterHotels('luxury')" class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                        Luxury Hotels
+                    </button>
+                    <button onclick="filterHotels('budget')" class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                        Budget Hotels
+                    </button>
+                    <button onclick="filterHotels('beach')" class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800">
+                        Beach Hotels
+                    </button>
+                </div>
+                <div id="hotels-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Hotels will be dynamically added here -->
+                </div>
+            </div>
+        `;
+        document.body.insertBefore(hotelsSection, document.getElementById('chatbot'));
+    }
+    
+    hotelsSection.classList.remove('hidden');
+    filterHotels('all'); // Show all hotels by default
+}
+
+function navigateToContact() {
+    // Update URL without reloading page
+    window.history.pushState({page: 'contact'}, '', '/contact');
+    
+    hideAllSections();
+    
+    // Create and show contact section if it doesn't exist
+    let contactSection = document.getElementById('contact-section');
+    if (!contactSection) {
+        contactSection = document.createElement('section');
+        contactSection.id = 'contact-section';
+        contactSection.className = 'py-12 bg-gray-50';
+        contactSection.innerHTML = `
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800">Contact Us</h2>
+                    <button onclick="navigateToHome()" class="bg-purple-100 text-purple-700 px-4 py-2 rounded hover:bg-purple-200">
+                        ← Back to Home
+                    </button>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Get in Touch</h3>
+                            <form onsubmit="submitContactForm(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Name</label>
+                                    <input type="text" required class="w-full px-4 py-2 border rounded focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Email</label>
+                                    <input type="email" required class="w-full px-4 py-2 border rounded focus:outline-none focus:border-purple-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 mb-2">Message</label>
+                                    <textarea required class="w-full px-4 py-2 border rounded focus:outline-none focus:border-purple-500" rows="4"></textarea>
+                                </div>
+                                <button type="submit" class="bg-purple-700 text-white px-6 py-2 rounded hover:bg-purple-800">
+                                    Send Message
+                                </button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Contact Information</h3>
+                            <div class="space-y-4">
+                                <p>📞 Phone: +1 (555) 123-4567</p>
+                                <p>✉️ Email: info@hotelbook.com</p>
+                                <p>📍 Address: 123 Hotel Street, City, Country</p>
+                                <p>⏰ Hours: 24/7 Customer Support</p>
+                            </div>
+                            <div class="mt-8">
+                                <h4 class="font-semibold mb-2">Follow Us</h4>
+                                <div class="flex space-x-4">
+                                    <a href="#" class="text-purple-700 hover:text-purple-900">Facebook</a>
+                                    <a href="#" class="text-purple-700 hover:text-purple-900">Twitter</a>
+                                    <a href="#" class="text-purple-700 hover:text-purple-900">Instagram</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertBefore(contactSection, document.getElementById('chatbot'));
+    }
+    
+    contactSection.classList.remove('hidden');
+}
+
+function hideAllSections() {
+    // Hide hero and features sections
+    document.querySelector('.bg-purple-200').classList.add('hidden');
+    document.querySelector('.bg-white').classList.add('hidden');
+    
+    // Hide hotels section if it exists
+    const hotelsSection = document.getElementById('hotels-section');
+    if (hotelsSection) {
+        hotelsSection.classList.add('hidden');
+    }
+    
+    // Hide contact section if it exists
+    const contactSection = document.getElementById('contact-section');
+    if (contactSection) {
+        contactSection.classList.add('hidden');
+    }
+}
+
+function filterHotels(type) {
+    const hotelsGrid = document.getElementById('hotels-grid');
+    hotelsGrid.innerHTML = ''; // Clear existing hotels
+    
+    // Show loading state
+    hotelsGrid.innerHTML = `
+        <div class="col-span-3 text-center py-4">
+            <p class="text-gray-600">🔍 Loading ${type} hotels...</p>
+        </div>
+    `;
+    
+    // Simulate API call delay
+    setTimeout(() => {
+        displayFilteredHotels(type);
+    }, 1000);
+}
+
+function displayFilteredHotels(type) {
+    const hotelsGrid = document.getElementById('hotels-grid');
+    hotelsGrid.innerHTML = ''; // Clear loading state
+    
+    // Use the existing hotel data from handleReview function
+    let hotels = [];
+    switch(type) {
+        case 'luxury':
+            handleReview('luxury');
+            break;
+        case 'budget':
+            handleReview('budget');
+            break;
+        case 'beach':
+            handleReview('beach');
+            break;
+        case 'all':
+            // Show a mix of all types
+            handleReview('luxury');
+            handleReview('budget');
+            handleReview('beach');
+            break;
+    }
+}
+
+function submitContactForm(event) {
+    event.preventDefault();
+    const form = event.target;
+    
+    // Show success message
+    form.innerHTML = `
+        <div class="text-center py-8">
+            <h3 class="text-xl font-semibold text-green-600 mb-2">Message Sent Successfully! 🎉</h3>
+            <p class="text-gray-600">We'll get back to you within 24 hours.</p>
+        </div>
+    `;
+}
+
+// Add this new code to handle browser back/forward buttons
+window.addEventListener('popstate', function(event) {
+    if (event.state) {
+        switch(event.state.page) {
+            case 'home':
+                navigateToHome();
+                break;
+            case 'hotels':
+                navigateToHotels();
+                break;
+            case 'contact':
+                navigateToContact();
+                break;
+        }
+    } else {
+        // Default to home if no state
+        navigateToHome();
+    }
+});
+
+// Initialize the first page load with proper history state
+window.history.replaceState({page: 'home'}, '', '/');
+
+function viewOffer(offerType) {
+    const chatBody = document.getElementById('chat-body');
+    if (chatBody.classList.contains('hidden')) {
+        toggleChat();
+    }
+
+    const chatMessages = document.getElementById('chat-messages');
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    let offerDetails = '';
+    switch(offerType) {
+        case 'early_bird':
+            offerDetails = `
+                🎉 Early Bird Special Offer
+                
+                • 25% off on your hotel stay
+                • Valid for bookings made 60 days in advance
+                • Available for all hotel categories
+                • Free cancellation up to 30 days before check-in
+                • Includes complimentary breakfast
+                
+                Would you like to search for hotels with this offer?
+            `;
+            break;
+        case 'weekend':
+            offerDetails = `
+                🎉 Weekend Special Offer
+                
+                • 15% off on weekend stays
+                • Free breakfast included
+                • Valid for Friday to Sunday stays
+                • Late checkout until 2 PM
+                • Free room upgrade (subject to availability)
+                
+                Would you like to search for hotels with this offer?
+            `;
+            break;
+        case 'long_stay':
+            offerDetails = `
+                🎉 Long Stay Special Offer
+                
+                • Stay 7 nights, pay for 5 nights only
+                • Complimentary airport transfer
+                • Daily breakfast included
+                • Free laundry service
+                • 20% off on spa treatments
+                
+                Would you like to search for hotels with this offer?
+            `;
+            break;
+    }
+
+    const botMessageContainer = document.createElement('div');
+    botMessageContainer.className = 'message-container';
+    botMessageContainer.innerHTML = `
+        <div class="bot-message">
+            ${offerDetails}
+        </div>
+        <div class="message-time">${currentTime}</div>
+    `;
+    chatMessages.appendChild(botMessageContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+window.addEventListener('scroll', () => {
+  const navbar = document.getElementById('navbar');
+  if (window.scrollY > 50) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+});
+
+
+    </script>
+
+</body>
+
+</html>
