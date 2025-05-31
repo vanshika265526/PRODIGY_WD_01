@@ -1,4 +1,4 @@
-const API_KEY = "AIzaSyCAA5nCti3XOX7aPqkeCnYa0RN2PXDuQeU"; // Replace with your Gemini API Key
+
 const chatBox = document.getElementById("chat-box");
 
 async function sendMessage() {
